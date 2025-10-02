@@ -5,11 +5,10 @@ include "koneksi.php";
 $role = $_SESSION['role'] ?? '';
 $nama = $_SESSION['nama'] ?? '';
 
-// Ambil data peminjaman
 $result = mysqli_query($db, "SELECT p.*, b.nama_barang 
                                 FROM peminjaman p 
                                 JOIN barang b ON p.kd_barang = b.kd_barang 
-                                ORDER BY p.kd_barang DESC");
+                                ORDER BY p.tanggal_pinjam DESC");
 
 // Total stok
 $total_stok = mysqli_fetch_assoc(mysqli_query($db, "SELECT SUM(jumlah) AS total FROM barang"))['total'] ?? 0;
@@ -308,16 +307,20 @@ h2 {
             </tbody>
           </table>
         </div>
-        <a href="beranda.php" class="btn-custom">Kembali</a>
-      </div>
+      <div class="mt-3">
+  <a href="beranda.php" class="btn btn-danger btn-lg w-100">
+    <i class="fa fa-arrow-left"></i> Kembali
+  </a>
+</div>
+
     </div>
 
   </div>
 </div>
 <!-- Footer -->
-<footer class="text-center py-3 mt-auto">
+<footer class="text-center py-3 mt-auto" style="background-color:#8BC6BF; width:100%;">
   <p class="mb-0">&copy; <?= date('Y'); ?> Direktorat Poltekkes Bandung</p>
 </footer>
-
+  
 </body>
 </html>
