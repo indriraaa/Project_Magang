@@ -1,3 +1,28 @@
+<?php
+session_start();
+
+// Jika sudah login, langsung redirect
+if (isset($_SESSION['pengguna'])) {
+    header("Location: beranda.php");
+    exit();
+}
+
+$message = "";
+$messageColor = "red";
+if (isset($_SESSION['flash_message'])) {
+    $message = $_SESSION['flash_message']['text'];
+    $messageColor = $_SESSION['flash_message']['color'];
+    unset($_SESSION['flash_message']);
+}
+
+// Ambil pesan dari URL (untuk sukses register)
+$msg = $_GET['msg'] ?? '';
+
+// Simpan input lama (agar tidak hilang kalau ada error)
+$old_email = $_SESSION['old']['email'] ?? '';
+$old_role  = $_SESSION['old']['role'] ?? '';
+unset($_SESSION['old']); // hapus setelah dipakai
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,9 +48,9 @@ body { font-family: 'Poppins', sans-serif; background: #f5f7f7; margin: 0; paddi
 .nav-link { font-weight: 500; font-size: 16px; color: white; }
 .navbar .d-flex i { font-size: 18px; color: #ffffff; letter-spacing: 1px; }
 
-.main { flex: 1; display: flex; flex-wrap: wrap; } /* tambahkan flex-wrap agar responsif */
+.main { flex: 1; display: flex; }
 .left-side {
-    flex: 1 1 100%;
+    flex: 1;
     background: #ffffff;
     display: flex;
     flex-direction: column;
@@ -33,14 +58,14 @@ body { font-family: 'Poppins', sans-serif; background: #f5f7f7; margin: 0; paddi
     justify-content: center;
     padding: 30px;
 }
-.left-side img { width: 100%; max-width: 350px; margin-bottom: 30px; }
+.left-side img { width: 350px; margin-bottom: 100px; }
 .right-side {
-    flex: 1 1 100%;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
     background: linear-gradient(135deg, #9e9f9f, #eaf4f4);
-    padding: 20px;
 }
 .container-form {
     background:#fff;
@@ -73,23 +98,6 @@ input[type="submit"], .btn-register {
 }
 input[type="submit"]:hover, .btn-register:hover { background:#6AA9AF; }
 .message { font-size:13px; margin-bottom:10px; }
-
-/* --- Responsif tambahan --- */
-@media screen and (min-width: 769px) {
-  .main {
-    flex-wrap: nowrap;
-  }
-  .left-side, .right-side {
-    flex: 1;
-    min-height: 100vh;
-  }
-  .left-side img:first-child {
-    max-width: 350px;
-  }
-  .left-side img:last-child {
-    max-width: 600px;
-  }
-}
 </style>
 </head>
 <body>
@@ -100,7 +108,7 @@ input[type="submit"]:hover, .btn-register:hover { background:#6AA9AF; }
         <i class="fa-solid fa-location-dot"></i>
         Direktorat Poltekkes Bandung, Jl. Padjajaran No 56 Bandung
     </span>
-    <a href="kontak_us.html" class="d-flex align-items-center gap-2" style="color: white; text-decoration: none; transition: color 0.3s ease;" onmouseover="this.style.color='grey'" onmouseout="this.style.color='white'">
+    <a href="kontak_us.php" class="d-flex align-items-center gap-2" style="color: white; text-decoration: none; transition: color 0.3s ease;" onmouseover="this.style.color='grey'" onmouseout="this.style.color='white'">
       <i class="fa-solid fa-phone"></i> Hubungi Kami
     </a>
 </div>
@@ -108,7 +116,7 @@ input[type="submit"]:hover, .btn-register:hover { background:#6AA9AF; }
 <div class="main">
     <div class="left-side">
         <img src="img/Logo.png" alt="Logo Poltekkes">
-        <img src="img/login.jpg" alt="Logo Login">
+        <img src="img/login.jpg" alt="Logo Login" style="width: 600px;">
     </div>
 
     <div class="right-side">
@@ -117,21 +125,36 @@ input[type="submit"]:hover, .btn-register:hover { background:#6AA9AF; }
                 <h2>Login</h2>
             </div>
 
+            <?php if (!empty($message)) { ?>
+                <p class="message" style="color: <?= $messageColor ?>;"><?= $message ?></p>
+            <?php } ?>
+
             <form action="proses_login.php" method="post" class="form-login">
                 <select name="role" required>
                     <option value="">-- Pilih Role --</option>
-                    <option value="admin">Admin</option>
-                    <option value="pegawai">Pegawai</option>
+                    <option value="admin" <?= ($old_role=='admin')?'selected':''; ?>>Admin</option>
+                    <option value="pegawai" <?= ($old_role=='pegawai')?'selected':''; ?>>Pegawai</option>
                 </select>
-                <input type="email" name="email" placeholder="Masukan Email" required>
+                <input type="email" name="email" placeholder="Masukan Email" value="<?= htmlspecialchars($old_email) ?>" required>
                 <input type="password" name="password" placeholder="Masukan Password" required>
                 <input type="submit" value="Login" name="Login">
             </form>
 
-            <a href="register.html" class="btn-register">Register</a>
+            <a href="register.php" class="btn-register">Register</a>
         </div>
     </div>
 </div>
+
+<?php if ($msg === 'success'): ?>
+<script>
+Swal.fire({
+    icon: 'success',
+    title: 'Registrasi Berhasil!',
+    text: 'Silakan login dengan akun Anda',
+    confirmButtonText: 'OK'
+});
+</script>
+<?php endif; ?>
 
 </body>
 </html>
